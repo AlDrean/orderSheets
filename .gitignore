@@ -1,0 +1,10 @@
+venv
+.pytest_cache
+tests_ordersheet/.pytest_cache
+.idea
+*.db
+sql_ordersheet/__pycache__/
+sql_app/__pycache__/
+tests_ordersheet/__pycache__/
+
+__init__.py
