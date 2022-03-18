@@ -15,7 +15,7 @@
 
 from typing import List
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 from . import models, schemas, crud
 
@@ -25,6 +25,7 @@ LOCAL_HASH = "<nome_estabelecimento>"
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
 
 
 def get_db():
@@ -89,7 +90,6 @@ def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     return db_items
 
 
-
 @app.post("/orderSheets/", response_model=List[schemas.OrderSheet])
 def read_orderSheets(order_sheet: schemas.OrderSheetCreate, db: Session = Depends(get_db)):
     db_order_sheet = crud.create_orderSheet(db, order_sheet,
@@ -110,6 +110,29 @@ def get_orderSheet(hash_: str, db: Session = Depends(get_db)):
     if not db_orderSheet:
         raise HTTPException(status_code=400, detail="Order sheet not found")
     return db_orderSheet
+
+@app.put("/orderSheets/", response_model=List[schemas.OrderSheet])
+def get_orderSheets(orderSheets: List[schemas.OrderSheet], db: Session = Depends(get_db)):
+    db_ordersheets = []
+
+    for ordersheet in orderSheets:
+        db_orderSheet = crud.get_orderSheet_(db, ordersheet.id)
+        if db_orderSheet:
+            db_orderSheet = crud.update_orderSheet(db,ordersheet)
+            db_ordersheets.append(db_orderSheet)
+
+    return db_ordersheets
+
+
+@app.put("/orderSheets/", response_model=schemas.OrderSheet)
+def get_orderSheets(orderSheets: schemas.OrderSheet, db: Session = Depends(get_db)):
+    db_orderSheet = crud.get_orderSheet_(db, orderSheets.id)
+    if db_orderSheet:
+        db_ordersheet = crud.update_orderSheet(db,orderSheets)
+        return db_ordersheet
+    raise HTTPException(status_code=400, detail="Order sheet not found")
+
+
 
 
 @app.get("/qrcode/teste/")

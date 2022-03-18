@@ -35,20 +35,17 @@ def update_item(db: Session, item: schemas.Item):
 
     return item
 
-
-#def update_items(db: Session, items: List[schemas.Item]):
-#    for item in items:
-#        db.query(models.Items).filter(models.Items.id == item.id).update(
-#            {"name": item.name,
-#             "price": item.price,
-#             "active": item.active
-#             }
-#        )
-
-
-# def get_orderSheet(db: Session, hash_: str):
-#    return db.query(models.OrderSheet).filter(models.OrderSheet.hash_order_id == hash_).all()
-
+def update_orderSheet(db:Session, ordersheet:schemas.OrderSheet):
+    db_orderS = db.query(models.OrderSheet).filter(models.OrderSheet.id == ordersheet.id).update(
+        {
+            "item": ordersheet.item,
+            "consumed": ordersheet.consumed,
+            "consumed_location": ordersheet.consumed_location,
+            "consumed_time": ordersheet.consumed_time
+        }
+    )
+    db.commit()
+    db.flush()
 
 def get_orderSheets(db: Session, skip: int = 0, limit=100):
     return db.query(models.OrderSheet).offset(skip).limit(limit).all()
