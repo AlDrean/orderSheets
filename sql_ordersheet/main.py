@@ -13,8 +13,6 @@
 # @TODO: Fazer um  app d e atk à porta da api
 
 
-
-
 from typing import List
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -37,7 +35,7 @@ def get_db():
         db.close()
 
 
-@app.post("/items/", response_model=schemas.Item)
+@app.post("/item/", response_model=schemas.Item)
 def create_item(item: schemas.ItemCreate, db: Session = Depends(get_db)):
     db_item = crud.get_item(db, item_name=item.name)
     if db_item:
@@ -45,9 +43,34 @@ def create_item(item: schemas.ItemCreate, db: Session = Depends(get_db)):
     return crud.create_item(db=db, item=item)
 
 
-@app.get("/items/", response_model=List[schemas.Item])
-def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    db_items = crud.get_items(db, skip=skip, limit=limit)
+@app.put("/item/{item_id}", response_model=schemas.Item)
+def update_item(items_id: int, item: schemas.Item, db: Session = Depends(get_db)):
+    db_item = crud.get_item_id(db, item_id=items_id)
+    if not db_item:
+        return crud.update_item(db=db, item=item)
+
+
+# @TODO: encontrar um jeito melhor que criar u ma exceção de html caso um dos itens da lista esteja repitido
+@app.post("/items/", response_model=List[schemas.Item])
+def create_item(items: List[schemas.ItemCreate], db: Session = Depends(get_db)):
+    db_items = []
+
+    for item in items:
+        db_item = crud.get_item(db, item_name=item.name)
+        # @TODO here
+        if not db_item:
+            db_items.append(crud.create_item(db=db, item=item))
+    return db_items
+
+
+@app.put("/items/", response_model=List[schemas.Item])
+def update_items(items: List[schemas.Item], db: Session = Depends(get_db)):
+    db_items = []
+    for item in items:
+        db_item = crud.get_item_id(db, item_id=item.id)
+        if db_item:
+            db_item = crud.update_item(db=db, item=item)
+            db_items.append(db_item)
     return db_items
 
 
@@ -57,6 +80,14 @@ def read_items(item_id: int, db: Session = Depends(get_db)):
     if db_item:
         return db_item
     raise HTTPException(status_code=400, detail="Item not found")
+
+
+
+@app.get("/items/", response_model=List[schemas.Item])
+def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    db_items = crud.get_items(db, skip=skip, limit=limit)
+    return db_items
+
 
 
 @app.post("/orderSheets/", response_model=List[schemas.OrderSheet])
@@ -75,7 +106,6 @@ def get_orderSheets(skip: int = 0, limit: int = 100, db: Session = Depends(get_d
 
 @app.get("/orderSheets/{hash_}", response_model=List[schemas.OrderSheet])
 def get_orderSheet(hash_: str, db: Session = Depends(get_db)):
-
     db_orderSheet = crud.get_orderSheet_(db, hash_order_id=hash_)
     if not db_orderSheet:
         raise HTTPException(status_code=400, detail="Order sheet not found")
@@ -86,4 +116,3 @@ def get_orderSheet(hash_: str, db: Session = Depends(get_db)):
 def qrCodeLimitest():
     array = [i for i in range(4296)]
     return array
-
