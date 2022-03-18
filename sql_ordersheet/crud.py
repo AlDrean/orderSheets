@@ -22,6 +22,10 @@ def get_orderSheet_(db: Session, hash_order_id: str):
     return db.query(models.OrderSheet).filter(models.OrderSheet.hash_order_id == hash_order_id).all()
 
 
+def get_orderSheet_(db: Session, ordersheet_id: int):
+    return db.query(models.OrderSheet).filter(models.OrderSheet.id == ordersheet_id).first()
+
+
 def update_item(db: Session, item: schemas.Item):
     db_item = db.query(models.Items).filter(models.Items.id == item.id).update(
         {"name": item.name,

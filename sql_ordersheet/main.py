@@ -27,7 +27,6 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
-
 def get_db():
     db = SessionLocal()
     try:
@@ -83,7 +82,6 @@ def read_items(item_id: int, db: Session = Depends(get_db)):
     raise HTTPException(status_code=400, detail="Item not found")
 
 
-
 @app.get("/items/", response_model=List[schemas.Item])
 def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     db_items = crud.get_items(db, skip=skip, limit=limit)
@@ -111,6 +109,17 @@ def get_orderSheet(hash_: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Order sheet not found")
     return db_orderSheet
 
+
+@app.put("/orderSheets/{ordersheet_id}", response_model=schemas.OrderSheet)
+def get_orderSheet(ordersheet_id: int, ordersheet: schemas.OrderSheet, db: Session = Depends(get_db)):
+    db_orderSheet = crud.get_orderSheet_(db, ordersheet_id=ordersheet_id)
+
+    if not db_orderSheet:
+        raise HTTPException(status_code=400, detail="Order sheet not found")
+    db_orderSheet = crud.update_orderSheet(db, ordersheet)
+    return ordersheet
+
+
 @app.put("/orderSheets/", response_model=List[schemas.OrderSheet])
 def get_orderSheets(orderSheets: List[schemas.OrderSheet], db: Session = Depends(get_db)):
     db_ordersheets = []
@@ -118,7 +127,7 @@ def get_orderSheets(orderSheets: List[schemas.OrderSheet], db: Session = Depends
     for ordersheet in orderSheets:
         db_orderSheet = crud.get_orderSheet_(db, ordersheet.id)
         if db_orderSheet:
-            db_orderSheet = crud.update_orderSheet(db,ordersheet)
+            db_orderSheet = crud.update_orderSheet(db, ordersheet)
             db_ordersheets.append(db_orderSheet)
 
     return db_ordersheets
@@ -128,14 +137,16 @@ def get_orderSheets(orderSheets: List[schemas.OrderSheet], db: Session = Depends
 def get_orderSheets(orderSheets: schemas.OrderSheet, db: Session = Depends(get_db)):
     db_orderSheet = crud.get_orderSheet_(db, orderSheets.id)
     if db_orderSheet:
-        db_ordersheet = crud.update_orderSheet(db,orderSheets)
+        db_ordersheet = crud.update_orderSheet(db, orderSheets)
         return db_ordersheet
     raise HTTPException(status_code=400, detail="Order sheet not found")
-
-
 
 
 @app.get("/qrcode/teste/")
 def qrCodeLimitest():
     array = [i for i in range(4296)]
     return array
+
+###########################################################
+# funcional
+############################################################
