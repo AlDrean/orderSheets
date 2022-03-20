@@ -30,6 +30,15 @@ def test_insert_item():
                               "active": True
                             }
     response = client.get("/items/")
+    assert response.json() == {
+        "name": "cavalo",
+        "hashId": "5368811147044902053",
+        "price": 1,
+        "id": 2,
+        "active": True
+    }
+
+
     assert response.status_code == 200
 
 

@@ -1,13 +1,15 @@
 FROM python:3.8
 
 WORKDIR /app
-COPY requiirements.txt /app/requirements.txt
 
-RUN apt-get update\
+COPY requirements.txt /app/requirements.txt
+
+RUN apt-get update \
     && apt-get install gcc -y \
-    && app-get clean
+    && apt-get clean
 
 RUN pip install virtualenv
+
 RUN virtualenv env
 
 RUN env/bin/pip install -r /app/requirements.txt \

@@ -39,7 +39,8 @@ def update_item(db: Session, item: schemas.Item):
 
     return item
 
-def update_orderSheet(db:Session, ordersheet:schemas.OrderSheet):
+
+def update_orderSheet(db: Session, ordersheet: schemas.OrderSheet):
     db_orderS = db.query(models.OrderSheet).filter(models.OrderSheet.id == ordersheet.id).update(
         {
             "item": ordersheet.item,
@@ -50,6 +51,7 @@ def update_orderSheet(db:Session, ordersheet:schemas.OrderSheet):
     )
     db.commit()
     db.flush()
+
 
 def get_orderSheets(db: Session, skip: int = 0, limit=100):
     return db.query(models.OrderSheet).offset(skip).limit(limit).all()
